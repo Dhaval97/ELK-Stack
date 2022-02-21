@@ -1,0 +1,58 @@
+"""
+Basic bash script. (Ideal for initial setup)
+"""
+
+#!/bin/bash
+
+sudo wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.14.0-amd64.deb
+
+FILENAME=$(ls filebeat* 2> /dev/null | head -1)
+
+sudo dpkg -i $FILENAME
+
+sudo /bin/sed -ie 's/output.elasticsearch:/#output.elasticsearch:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie 's/#output.logstash:/output.logstash:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/#hosts:/ s/#hosts:/hosts:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/hosts:/ s/hosts:/#hosts:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/localhost:5044/ s/localhost:5044/<private-ip-address>:5044/' /etc/filebeat/filebeat.yml
+
+sudo systemctl daemon-reload
+sudo systemctl start filebeat
+sudo systemctl enable filebeat
+sudo filebeat modules enable system
+
+
+*******************************************************************************************************************************************
+
+"""
+Bash script to capture Apache logs. Also to define some parameters (name, tags, fields).
+"""
+
+!/bin/bash
+
+sudo wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.14.0-amd64.deb
+
+FILENAME=$(ls filebeat* 2> /dev/null | head -1)
+
+sudo dpkg -i $FILENAME
+
+sudo /bin/sed -ie '0,/false/ s/false/true/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/\/var\/log\/\*.log/ s/\/var\/log\/\*.log/\/var\/log\/apache2\/\*access\*.log/' /etc/filebeat/filebeat.yml
+
+sudo /bin/sed -ie '112 a name: <name1>' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '113 a tags: ["<name1>", "apache"]' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '114 a fields: {log_type: <name1>}' /etc/filebeat/filebeat.yml
+
+sudo /bin/sed -ie 's/output.elasticsearch:/#output.elasticsearch:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie 's/#output.logstash:/output.logstash:/' /etc/filebeat/filebeat.yml
+
+sudo /bin/sed -ie '0,/#hosts:/ s/#hosts:/hosts:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/hosts:/ s/hosts:/#hosts:/' /etc/filebeat/filebeat.yml
+sudo /bin/sed -ie '0,/localhost:5044/ s/localhost:5044/<private-ip-address>:5044/' /etc/filebeat/filebeat.yml
+
+sudo systemctl daemon-reload
+sudo systemctl start filebeat
+sudo systemctl enable filebeat
+sudo filebeat modules enable system
+
+*******************************************************************************************************************************************
